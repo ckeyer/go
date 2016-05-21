@@ -11,10 +11,10 @@ import (
 	"crypto/tls"
 	"flag"
 	"fmt"
+	"github.com/ckeyer/gosrc/src/net/http/ckeyerinternal"
 	"log"
 	"net"
 	"net/http"
-	"net/http/internal"
 	"os"
 	"runtime"
 	"sync"
@@ -108,7 +108,7 @@ func (s *Server) StartTLS() {
 	if s.URL != "" {
 		panic("Server already started")
 	}
-	cert, err := tls.X509KeyPair(internal.LocalhostCert, internal.LocalhostKey)
+	cert, err := tls.X509KeyPair(ckeyerinternal.LocalhostCert, ckeyerinternal.LocalhostKey)
 	if err != nil {
 		panic(fmt.Sprintf("httptest: NewTLSServer: %v", err))
 	}

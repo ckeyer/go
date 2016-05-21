@@ -12,6 +12,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"github.com/ckeyer/gosrc/src/net/http/ckeyerinternal"
 	"internal/testenv"
 	"io"
 	"io/ioutil"
@@ -21,7 +22,6 @@ import (
 	. "net/http"
 	"net/http/httptest"
 	"net/http/httputil"
-	"net/http/internal"
 	"net/url"
 	"os"
 	"os/exec"
@@ -1039,7 +1039,7 @@ func TestAutomaticHTTP2_Serve(t *testing.T) {
 }
 
 func TestAutomaticHTTP2_ListenAndServe(t *testing.T) {
-	cert, err := tls.X509KeyPair(internal.LocalhostCert, internal.LocalhostKey)
+	cert, err := tls.X509KeyPair(ckeyerinternal.LocalhostCert, ckeyerinternal.LocalhostKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1049,7 +1049,7 @@ func TestAutomaticHTTP2_ListenAndServe(t *testing.T) {
 }
 
 func TestAutomaticHTTP2_ListenAndServe_GetCertificate(t *testing.T) {
-	cert, err := tls.X509KeyPair(internal.LocalhostCert, internal.LocalhostKey)
+	cert, err := tls.X509KeyPair(ckeyerinternal.LocalhostCert, ckeyerinternal.LocalhostKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1447,7 +1447,7 @@ func testHandlerBodyClose(t *testing.T, i int, tt handlerBodyCloseTest) {
 			tt.connectionHeader() +
 			"Transfer-Encoding: chunked\r\n" +
 			"\r\n")
-		cw := internal.NewChunkedWriter(&conn.readBuf)
+		cw := ckeyerinternal.NewChunkedWriter(&conn.readBuf)
 		io.WriteString(cw, body)
 		cw.Close()
 		conn.readBuf.WriteString("\r\n")

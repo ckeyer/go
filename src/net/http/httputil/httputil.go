@@ -7,8 +7,8 @@
 package httputil
 
 import (
+	"github.com/ckeyer/gosrc/src/net/http/ckeyerinternal"
 	"io"
-	"net/http/internal"
 )
 
 // NewChunkedReader returns a new chunkedReader that translates the data read from r
@@ -18,7 +18,7 @@ import (
 // NewChunkedReader is not needed by normal applications. The http package
 // automatically decodes chunking when reading response bodies.
 func NewChunkedReader(r io.Reader) io.Reader {
-	return internal.NewChunkedReader(r)
+	return ckeyerinternal.NewChunkedReader(r)
 }
 
 // NewChunkedWriter returns a new chunkedWriter that translates writes into HTTP
@@ -31,9 +31,9 @@ func NewChunkedReader(r io.Reader) io.Reader {
 // would result in double chunking or chunking with a Content-Length
 // length, both of which are wrong.
 func NewChunkedWriter(w io.Writer) io.WriteCloser {
-	return internal.NewChunkedWriter(w)
+	return ckeyerinternal.NewChunkedWriter(w)
 }
 
 // ErrLineTooLong is returned when reading malformed chunked data
 // with lines that are too long.
-var ErrLineTooLong = internal.ErrLineTooLong
+var ErrLineTooLong = ckeyerinternal.ErrLineTooLong

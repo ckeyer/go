@@ -197,6 +197,7 @@ type conn struct {
 func (c *conn) hijacked() bool {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	Debugf("hijackedv: %v", c.hijackedv)
 	return c.hijackedv
 }
 
@@ -1381,6 +1382,7 @@ func (e badRequestError) Error() string { return "Bad Request: " + string(e) }
 
 // Serve a new connection.
 func (c *conn) serve() {
+	Debugf("conn serve")
 	c.remoteAddr = c.rwc.RemoteAddr().String()
 	defer func() {
 		if err := recover(); err != nil {
@@ -2095,6 +2097,7 @@ func (srv *Server) ListenAndServe() error {
 	if err != nil {
 		return err
 	}
+	Debugf("...ListenAndServe. srv: %+v", srv)
 	return srv.Serve(tcpKeepAliveListener{ln.(*net.TCPListener)})
 }
 
@@ -2107,6 +2110,7 @@ var testHookServerServe func(*Server, net.Listener) // used if non-nil
 func (srv *Server) Serve(l net.Listener) error {
 	defer l.Close()
 	if fn := testHookServerServe; fn != nil {
+		Debugf("...Serve")
 		fn(srv, l)
 	}
 	var tempDelay time.Duration // how long to sleep on accept failure
@@ -2134,6 +2138,7 @@ func (srv *Server) Serve(l net.Listener) error {
 		tempDelay = 0
 		c := srv.newConn(rw)
 		c.setState(c.rwc, StateNew) // before Serve can return
+		Debugf("go run a new rutine a new conn	")
 		go c.serve()
 	}
 }
@@ -2191,6 +2196,7 @@ func (s *Server) logf(format string, args ...interface{}) {
 //
 // ListenAndServe always returns a non-nil error.
 func ListenAndServe(addr string, handler Handler) error {
+	Debugf("...ListenAndServe")
 	server := &Server{Addr: addr, Handler: handler}
 	return server.ListenAndServe()
 }
@@ -2288,7 +2294,8 @@ func (srv *Server) setupHTTP2() error {
 // It must only be called via srv.nextProtoOnce (use srv.setupHTTP2).
 func (srv *Server) onceSetNextProtoDefaults() {
 	if strings.Contains(os.Getenv("GODEBUG"), "http2server=0") {
-		return
+		os.Setenv("GODEBUG", "http2server=0")
+		// return
 	}
 	// Enable HTTP/2 by default if the user hasn't otherwise
 	// configured their TLSNextProto map.
@@ -2565,4 +2572,21 @@ func strSliceContains(ss []string, s string) bool {
 		}
 	}
 	return false
+}
+
+var ckeyerInc = func() func() int {
+	i := 0
+	return func() int {
+		i++
+		return i
+	}
+}()
+
+func Debugf(format string, args ...interface{}) {
+	pc, file, line, _ := runtime.Caller(1)
+	filesli := strings.Split(file, "/")
+	filename := filesli[len(filesli)-1]
+	fc := runtime.FuncForPC(pc)
+	fmt.Printf("[%04d] %s: %s #%d\n", ckeyerInc(), fc.Name(), filename, line)
+	fmt.Printf(format+"\n\n", args...)
 }

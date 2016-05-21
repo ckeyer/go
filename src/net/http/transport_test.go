@@ -17,6 +17,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"github.com/ckeyer/gosrc/src/net/http/ckeyerinternal"
 	"io"
 	"io/ioutil"
 	"log"
@@ -24,7 +25,6 @@ import (
 	. "net/http"
 	"net/http/httptest"
 	"net/http/httputil"
-	"net/http/internal"
 	"net/url"
 	"os"
 	"reflect"
@@ -2957,7 +2957,7 @@ func TestTransportReuseConnEmptyResponseBody(t *testing.T) {
 
 // Issue 13839
 func TestNoCrashReturningTransportAltConn(t *testing.T) {
-	cert, err := tls.X509KeyPair(internal.LocalhostCert, internal.LocalhostKey)
+	cert, err := tls.X509KeyPair(ckeyerinternal.LocalhostCert, ckeyerinternal.LocalhostKey)
 	if err != nil {
 		t.Fatal(err)
 	}

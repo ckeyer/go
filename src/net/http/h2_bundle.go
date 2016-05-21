@@ -24,7 +24,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"internal/golang.org/x/net/http2/hpack"
+	"golang.org/x/net/http2/hpack"
 	"io"
 	"io/ioutil"
 	"log"

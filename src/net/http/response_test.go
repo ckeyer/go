@@ -10,9 +10,9 @@ import (
 	"compress/gzip"
 	"crypto/rand"
 	"fmt"
+	"github.com/ckeyer/gosrc/src/net/http/ckeyerinternal"
 	"io"
 	"io/ioutil"
-	"net/http/internal"
 	"net/url"
 	"reflect"
 	"regexp"
@@ -582,7 +582,7 @@ func TestReadResponseCloseInMiddle(t *testing.T) {
 		}
 		var wr io.Writer = &buf
 		if test.chunked {
-			wr = internal.NewChunkedWriter(wr)
+			wr = ckeyerinternal.NewChunkedWriter(wr)
 		}
 		if test.compressed {
 			buf.WriteString("Content-Encoding: gzip\r\n")
