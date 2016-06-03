@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"reflect"
+	"runtime"
 	"sync"
 	"unicode/utf8"
 )
@@ -194,7 +195,26 @@ func Fprintf(w io.Writer, format string, a ...interface{}) (n int, err error) {
 // Printf formats according to a format specifier and writes to standard output.
 // It returns the number of bytes written and any write error encountered.
 func Printf(format string, a ...interface{}) (n int, err error) {
+	DebugPre()
 	return Fprintf(os.Stdout, format, a...)
+}
+
+func DebugPre() {
+	pc, file, line, ok := runtime.Caller(2)
+	if ok {
+		for i := len(file) - 1; i > 0; i-- {
+			if file[i] == '/' {
+				Fprint(os.Stdout, file[i+1:])
+				break
+			}
+		}
+		f := runtime.FuncForPC(pc)
+		Fprint(os.Stdout, ":")
+		Fprint(os.Stdout, line)
+		Fprint(os.Stdout, " ")
+		Fprint(os.Stdout, f.Name())
+		Fprint(os.Stdout, " >>> ")
+	}
 }
 
 // Sprintf formats according to a format specifier and returns the resulting string.
@@ -261,6 +281,7 @@ func Fprintln(w io.Writer, a ...interface{}) (n int, err error) {
 // Spaces are always added between operands and a newline is appended.
 // It returns the number of bytes written and any write error encountered.
 func Println(a ...interface{}) (n int, err error) {
+	DebugPre()
 	return Fprintln(os.Stdout, a...)
 }
 
