@@ -50,6 +50,7 @@ var (
 )
 
 func selectsize(size uintptr) uintptr {
+	println("selectsize(size uintptr) uintptr...")
 	selsize := unsafe.Sizeof(hselect{}) +
 		(size-1)*unsafe.Sizeof(hselect{}.scase[0]) +
 		size*unsafe.Sizeof(*hselect{}.lockorder) +
@@ -58,6 +59,7 @@ func selectsize(size uintptr) uintptr {
 }
 
 func newselect(sel *hselect, selsize int64, size int32) {
+	println("newselect(sel *hselect, selsize int64, size int32)...")
 	if selsize != int64(selectsize(uintptr(size))) {
 		print("runtime: bad select size ", selsize, ", want ", selectsize(uintptr(size)), "\n")
 		throw("bad select size")
@@ -74,6 +76,7 @@ func newselect(sel *hselect, selsize int64, size int32) {
 
 //go:nosplit
 func selectsend(sel *hselect, c *hchan, elem unsafe.Pointer) (selected bool) {
+	println("selectsend(sel *hselect, c *hchan, elem unsafe.Pointer) (selected bool)...")
 	// nil cases do not compete
 	if c != nil {
 		selectsendImpl(sel, c, getcallerpc(unsafe.Pointer(&sel)), elem, uintptr(unsafe.Pointer(&selected))-uintptr(unsafe.Pointer(&sel)))
@@ -83,6 +86,7 @@ func selectsend(sel *hselect, c *hchan, elem unsafe.Pointer) (selected bool) {
 
 // cut in half to give stack a chance to split
 func selectsendImpl(sel *hselect, c *hchan, pc uintptr, elem unsafe.Pointer, so uintptr) {
+	println("selectsendImpl(sel *hselect, c *hchan, pc uintptr, elem unsafe.Pointer, so uintptr)...")
 	i := sel.ncase
 	if i >= sel.tcase {
 		throw("selectsend: too many cases")
@@ -103,6 +107,7 @@ func selectsendImpl(sel *hselect, c *hchan, pc uintptr, elem unsafe.Pointer, so 
 
 //go:nosplit
 func selectrecv(sel *hselect, c *hchan, elem unsafe.Pointer) (selected bool) {
+	println("selectrecv(sel *hselect, c *hchan, elem unsafe.Pointer) (selected bool)...")
 	// nil cases do not compete
 	if c != nil {
 		selectrecvImpl(sel, c, getcallerpc(unsafe.Pointer(&sel)), elem, nil, uintptr(unsafe.Pointer(&selected))-uintptr(unsafe.Pointer(&sel)))
@@ -112,6 +117,7 @@ func selectrecv(sel *hselect, c *hchan, elem unsafe.Pointer) (selected bool) {
 
 //go:nosplit
 func selectrecv2(sel *hselect, c *hchan, elem unsafe.Pointer, received *bool) (selected bool) {
+	println("selectrecv2(sel *hselect, c *hchan, elem unsafe.Pointer, received *bool) (selected bool)...")
 	// nil cases do not compete
 	if c != nil {
 		selectrecvImpl(sel, c, getcallerpc(unsafe.Pointer(&sel)), elem, received, uintptr(unsafe.Pointer(&selected))-uintptr(unsafe.Pointer(&sel)))
@@ -120,6 +126,7 @@ func selectrecv2(sel *hselect, c *hchan, elem unsafe.Pointer, received *bool) (s
 }
 
 func selectrecvImpl(sel *hselect, c *hchan, pc uintptr, elem unsafe.Pointer, received *bool, so uintptr) {
+	println("selectrecvImpl(sel *hselect, c *hchan, pc uintptr, elem unsafe.Pointer, received *bool, so uintptr)...")
 	i := sel.ncase
 	if i >= sel.tcase {
 		throw("selectrecv: too many cases")
@@ -140,11 +147,13 @@ func selectrecvImpl(sel *hselect, c *hchan, pc uintptr, elem unsafe.Pointer, rec
 
 //go:nosplit
 func selectdefault(sel *hselect) (selected bool) {
+	println("selectdefault(sel *hselect) (selected bool)...")
 	selectdefaultImpl(sel, getcallerpc(unsafe.Pointer(&sel)), uintptr(unsafe.Pointer(&selected))-uintptr(unsafe.Pointer(&sel)))
 	return
 }
 
 func selectdefaultImpl(sel *hselect, callerpc uintptr, so uintptr) {
+	println("selectdefaultImpl(sel *hselect, callerpc uintptr, so uintptr)...")
 	i := sel.ncase
 	if i >= sel.tcase {
 		throw("selectdefault: too many cases")
@@ -162,6 +171,7 @@ func selectdefaultImpl(sel *hselect, callerpc uintptr, so uintptr) {
 }
 
 func sellock(sel *hselect) {
+	println("sellock(sel *hselect)...")
 	lockslice := slice{unsafe.Pointer(sel.lockorder), int(sel.ncase), int(sel.ncase)}
 	lockorder := *(*[]*hchan)(unsafe.Pointer(&lockslice))
 	var c *hchan
@@ -174,6 +184,7 @@ func sellock(sel *hselect) {
 }
 
 func selunlock(sel *hselect) {
+	println("selunlock(sel *hselect)...")
 	// We must be very careful here to not touch sel after we have unlocked
 	// the last lock, because sel can be freed right after the last unlock.
 	// Consider the following situation.
@@ -200,11 +211,13 @@ func selunlock(sel *hselect) {
 }
 
 func selparkcommit(gp *g, sel unsafe.Pointer) bool {
+	println("selparkcommit(gp *g, sel unsafe.Pointer) bool...")
 	selunlock((*hselect)(sel))
 	return true
 }
 
 func block() {
+	println("block()...")
 	gopark(nil, nil, "select (no cases)", traceEvGoStop, 1) // forever
 }
 
@@ -212,6 +225,7 @@ func block() {
 // to run, so cannot appear at the top of a split stack.
 //go:nosplit
 func selectgo(sel *hselect) {
+	println("selectgo(sel *hselect)...")
 	pc, offset := selectgoImpl(sel)
 	*(*bool)(add(unsafe.Pointer(&sel), uintptr(offset))) = true
 	setcallerpc(unsafe.Pointer(&sel), pc)
@@ -220,6 +234,7 @@ func selectgo(sel *hselect) {
 // selectgoImpl returns scase.pc and scase.so for the select
 // case which fired.
 func selectgoImpl(sel *hselect) (uintptr, uint16) {
+	println("selectgoImpl(sel *hselect) (uintptr, uint16)...")
 	if debugSelect {
 		print("select: sel=", sel, "\n")
 	}
@@ -566,6 +581,7 @@ sclose:
 }
 
 func (c *hchan) sortkey() uintptr {
+	println("(c *hchan) sortkey() uintptr...")
 	// TODO(khr): if we have a moving garbage collector, we'll need to
 	// change this function.
 	return uintptr(unsafe.Pointer(c))
@@ -592,6 +608,7 @@ const (
 
 //go:linkname reflect_rselect reflect.rselect
 func reflect_rselect(cases []runtimeSelect) (chosen int, recvOK bool) {
+	println("reflect_rselect(cases []runtimeSelect) (chosen int, recvOK bool)...")
 	// flagNoScan is safe here, because all objects are also referenced from cases.
 	size := selectsize(uintptr(len(cases)))
 	sel := (*hselect)(mallocgc(size, nil, flagNoScan))
@@ -622,6 +639,7 @@ func reflect_rselect(cases []runtimeSelect) (chosen int, recvOK bool) {
 }
 
 func (q *waitq) dequeueSudoG(sgp *sudog) {
+	println("(q *waitq) dequeueSudoG(sgp *sudog)...")
 	x := sgp.prev
 	y := sgp.next
 	if x != nil {

@@ -2,7 +2,7 @@ FROM ckeyer/dev:forgo
 
 MAINTAINER Chuanjian Wang <me@ckeyer.com>
 
-COPY ./try /go
+COPY ./trys /go
 
 WORKDIR /go
 
