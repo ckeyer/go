@@ -1,0 +1,10 @@
+api
+doc
+test
+misc
+.git
+
+src/***/*_test*
+src/***/*_386*
+src/***/*_arm*
+src/***/*_freebsd*

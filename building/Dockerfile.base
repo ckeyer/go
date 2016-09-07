@@ -1,0 +1,20 @@
+FROM centos:7
+
+MAINTAINER Chuanjian Wang <me@ckeyer.com>
+
+RUN curl -sSL -o /tmp/go.tgz https://storage.googleapis.com/golang/go1.4.3.linux-amd64.tar.gz && \
+	cd /usr/lib && \
+	tar zxf /tmp/go.tgz && \
+	rm -rf /tmp/go.tgz
+
+RUN yum clean all && \
+	yum update -y && \
+	yum install -y gcc
+
+ONBUILD ENV GOROOT_BOOTSTRAP=/usr/lib/go
+ONBUILD ENV GOROOT=/usr/local/go
+ONBUILD ENV PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+
+ONBUILD COPY . /usr/local/go/
+ONBUILD RUN cd /usr/local/go/src && ./make.bash
+
